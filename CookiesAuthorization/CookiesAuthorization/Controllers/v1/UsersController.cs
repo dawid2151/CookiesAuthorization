@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Security.Policy;
-using System.Text;
 using System.Threading.Tasks;
 using CookiesAuthorization.Contracts.v1.Requests;
 using CookiesAuthorization.Contracts.v1.Responses;
@@ -22,21 +19,24 @@ namespace CookiesAuthorization.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private IDatabaseProvider _databaseProvider;
-
-        public UsersController(IDatabaseProvider databaseProvider)
+        private IUsersService _usersService;
+        private IHashingService _hashingService;
+     
+        public UsersController(IUsersService usersService, IHashingService hashingService)
         {
-            _databaseProvider = databaseProvider;
+            _usersService = usersService;
+            _hashingService = hashingService;
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromForm]LoginRequest loginRequest)
         {
-            var requestedUser = _databaseProvider.UserEntries.SingleOrDefault(user => user.Username == loginRequest.Username);
+            var requestedUser = _usersService.GetUserByUserName(loginRequest.Username);
             if (requestedUser is null)
                 return BadRequest("User does not exist.");
+
             var hashString = loginRequest.Password + requestedUser.Salt;
-            var calculatedHash = MockDatabaseProvider.GetHashFromString(hashString);
+            var calculatedHash = _hashingService.HashFromString(hashString);
             if (!calculatedHash.Compare(requestedUser.PasswordHash))
                 return BadRequest("Password is not correct");
 
@@ -73,7 +73,7 @@ namespace CookiesAuthorization.Controllers
             {
                 return Conflict("User does not exist, log in to access resource");
             }
-            var user = _databaseProvider.UserEntries.Single(x => x.Username == username.Value);
+            var user = _usersService.GetUserByUserName(username.Value);
             if(user is null)
             {
                 return Conflict("Authenticated user does not match a user in database.");

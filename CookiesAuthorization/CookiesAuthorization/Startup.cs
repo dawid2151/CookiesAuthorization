@@ -41,7 +41,9 @@ namespace CookiesAuthorization
                     options.Cookie.HttpOnly = false;
                     options.Cookie.IsEssential = true;
                 });
-            services.AddSingleton<IDatabaseProvider, MockDatabaseProvider>();
+            services.AddScoped<IDatabaseProvider, MockDatabaseProvider>();
+            services.AddScoped<IUsersService, UsersService>();
+            services.AddScoped<IHashingService, SHA256HashingService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

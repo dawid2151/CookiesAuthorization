@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "fHDPKBgzmnjNdSaTRw28a+4TfGtJ1PhbMYi55QLIxOmvHO1PFY688QUNhGN1weQ/klSnx4rEuzzfaGKLAR6ioQ==",
+  "dgSpecHash": "CoejVi7HKhtPlYouuv08EDJimYerA3k4zkg2NbZhW+iPyPRKabK/rbxoGqAHJ7ZECk7xC0kt/TIJeTumPezX/A==",
   "success": true,
-  "projectFilePath": "D:\\Programming\\.Net\\WebApi\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization.csproj",
+  "projectFilePath": "G:\\Networking\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Ed\\.nuget\\packages\\microsoft.aspnetcore.html.abstractions\\2.2.0\\microsoft.aspnetcore.html.abstractions.2.2.0.nupkg.sha512",
     "C:\\Users\\Ed\\.nuget\\packages\\microsoft.aspnetcore.razor\\2.2.0\\microsoft.aspnetcore.razor.2.2.0.nupkg.sha512",

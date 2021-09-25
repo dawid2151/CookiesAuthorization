@@ -19,35 +19,31 @@ namespace CookiesAuthorization.Services
 
     public class MockDatabaseProvider : IDatabaseProvider
     {
+        private IHashingService _hashingService;
         public List<UserEntry> UserEntries { get; set; }
 
-        public MockDatabaseProvider()
+        public MockDatabaseProvider(IHashingService hashingService)
         {
+            _hashingService = hashingService;
+
             UserEntries = new List<UserEntry>()
             {
                 new UserEntry{
                     UserID = Guid.NewGuid(),
                     Username = "TestUser",
                     Salt = "TestSalt",
-                    PasswordHash = GetHashFromString("TestPassword" + "TestSalt"),
+                    PasswordHash = _hashingService.HashFromString("TestPassword" + "TestSalt"),
                     Role = "User"
                 },
                 new UserEntry{
                     UserID = Guid.NewGuid(),
                     Username = "TestAdmin",
                     Salt = "TestAdminSalt",
-                    PasswordHash = GetHashFromString("TestAdminPassword" + "TestAdminSalt"),
+                    PasswordHash = _hashingService.HashFromString("TestAdminPassword" + "TestAdminSalt"),
                     Role = "Administrator"
                 }
             };
         }
 
-        public static byte[] GetHashFromString(string data)
-        {
-            using(SHA256 sha = SHA256.Create())
-            {
-                return sha.ComputeHash(Encoding.UTF8.GetBytes(data));
-            }
-        }
     }
 }
