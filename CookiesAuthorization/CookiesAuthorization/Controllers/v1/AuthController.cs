@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using CookiesAuthorization.Contracts.v1;
 using CookiesAuthorization.Contracts.v1.Requests;
 using CookiesAuthorization.Contracts.v1.Responses;
 using CookiesAuthorization.DTO.v1;
@@ -28,7 +29,7 @@ namespace CookiesAuthorization.Controllers
             _usersService = usersService;
             _hashingService = hashingService;
         }
-        [HttpPost("register")]
+        [HttpPost(Endpoints.Auth.Register)]
         public async Task<IActionResult> Register([FromForm]RegisterRequest registerRequest)
         {
             if (registerRequest is null)
@@ -42,7 +43,7 @@ namespace CookiesAuthorization.Controllers
             {
                 UserID = Guid.NewGuid(),
                 Username = registerRequest.Username,
-                Role = "User"
+                Role = Roles.User
             };
             string salt = _hashingService.SaltFromUserEntry(userDTO);
             userDTO.Salt = salt;
@@ -78,11 +79,11 @@ namespace CookiesAuthorization.Controllers
                 Role = userDTO.Role
             };
 
-            return Ok(userResponse);
+            return Accepted(userResponse);
 
         }
 
-        [HttpPost("login")]
+        [HttpPost(Endpoints.Auth.Login)]
         public async Task<IActionResult> Login([FromForm]LoginRequest loginRequest)
         {
             var requestedUser = _usersService.GetUserByUserName(loginRequest.Username);
@@ -120,7 +121,7 @@ namespace CookiesAuthorization.Controllers
         }
 
         [Authorize]
-        [HttpGet("logout")]
+        [HttpGet(Endpoints.Auth.Logout)]
         public async Task<IActionResult> Logout()
         {
             var userName = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);

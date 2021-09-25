@@ -12,8 +12,9 @@ namespace CookiesAuthorization.Services
     {
         public UserEntry GetUserByUserName(string username);
         public bool AddUserEntry(UserEntry userEntry);
-
+        public bool RemoveUserEntry(UserEntry userEntry);
         public List<UserEntry> GetUsersBasedOnQuery(GetUsersQuery query);
+
 
     }
 
@@ -41,6 +42,17 @@ namespace CookiesAuthorization.Services
         {
             var users = _databaseProvider.UserEntries.OrderBy(x => x.Username).Skip(query.Offset).Take(query.Count).ToList();
             return users;
+        }
+
+        public bool RemoveUserEntry(UserEntry userEntry)
+        {
+            bool contains = _databaseProvider.UserEntries.Contains(userEntry);
+            if (!contains)
+                return false;
+
+            var removed = _databaseProvider.UserEntries.Remove(userEntry);
+
+            return removed;
         }
     }
 }

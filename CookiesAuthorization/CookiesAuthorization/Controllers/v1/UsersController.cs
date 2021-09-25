@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using CookiesAuthorization.Contracts.v1;
 using CookiesAuthorization.Contracts.v1.Requests;
 using CookiesAuthorization.Contracts.v1.Responses;
 using CookiesAuthorization.Models.v1;
@@ -21,7 +22,7 @@ namespace CookiesAuthorization.Controllers.v1
             _usersService = usersService;
         }
 
-        [HttpGet("getUserData")]
+        [HttpGet(Endpoints.Users.GetUserData)]
         public IActionResult GetUserData()
         {
             var username = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
@@ -34,8 +35,8 @@ namespace CookiesAuthorization.Controllers.v1
             return Ok(response);
         }
         
-        [Authorize(Roles = "Administrator")]
-        [HttpGet("getUsersData")]
+        [Authorize(Roles = Roles.Administrator)]
+        [HttpGet(Endpoints.Users.GetUsersData)]
         public IActionResult GetUsersData([FromQuery]GetUsersDataRequest getUsers)
         {
             var getUsersQuery = new GetUsersQuery
@@ -47,6 +48,27 @@ namespace CookiesAuthorization.Controllers.v1
             var users = _usersService.GetUsersBasedOnQuery(getUsersQuery);
 
             return Ok(users);
+        }
+
+        [Authorize(Roles = Roles.Administrator)]
+        [HttpGet(Endpoints.Users.DeleteUser)]
+        public IActionResult DeleteUser([FromQuery]DeleteUserRequest deleteUser)
+        {
+            var potentialUser = _usersService.GetUserByUserName(deleteUser.Username);
+            if (potentialUser is null)
+                return BadRequest("User does not exist.");
+
+            var removed = _usersService.RemoveUserEntry(potentialUser);
+            if (!removed)
+                return Conflict("Could not remove specified user.");
+
+            var response = new UserDataResponse
+            {
+                UserName = potentialUser.Username,
+                Role = potentialUser.Role
+            };
+
+            return Ok(response);
         }
     }
 }
