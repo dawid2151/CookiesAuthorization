@@ -11,6 +11,8 @@ using CookiesAuthorization.Contracts.v1.Responses;
 using CookiesAuthorization.ExtensionMethods;
 using CookiesAuthorization.Services;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,7 +30,7 @@ namespace CookiesAuthorization.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Login([FromForm]LoginRequest loginRequest)
+        public async Task<IActionResult> Login([FromForm]LoginRequest loginRequest)
         {
             var requestedUser = _databaseProvider.UserEntries.SingleOrDefault(user => user.Username == loginRequest.Username);
             if (requestedUser is null)
@@ -42,19 +44,42 @@ namespace CookiesAuthorization.Controllers
                 new Claim(ClaimTypes.NameIdentifier, requestedUser.Username),
                 new Claim(ClaimTypes.Role, requestedUser.Role)
             };
-            var claimIdentity = new ClaimsIdentity(claims);
+            var claimIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var claimPrincipal = new ClaimsPrincipal(claimIdentity);
 
-            HttpContext.SignInAsync(claimPrincipal, new AuthenticationProperties
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                claimPrincipal,
+                new AuthenticationProperties
             {
+                IsPersistent = true,
+                IssuedUtc = DateTime.UtcNow,
                 AllowRefresh = true,
                 //Use datetime provider for testability
-                ExpiresUtc = DateTime.Now.AddDays(7)
-            });
+                ExpiresUtc = DateTime.UtcNow.AddDays(7)
+            }) ;
 
             var userResponse = new UserDataResponse { UserName = requestedUser.Username, Role = requestedUser.Role };
 
             return Ok(userResponse);
+        }
+
+        [Authorize]
+        [HttpGet("getUserData")]
+        public IActionResult GetUserData()
+        {
+            var username = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            if(username is null)
+            {
+                return Conflict("User does not exist, log in to access resource");
+            }
+            var user = _databaseProvider.UserEntries.Single(x => x.Username == username.Value);
+            if(user is null)
+            {
+                return Conflict("Authenticated user does not match a user in database.");
+            }
+            var response = new UserDataResponse { UserName = user.Username, Role = user.Role };
+            return Ok(response);
         }
     }
 }

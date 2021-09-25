@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "G:\\Networking\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization.csproj": {}
+    "D:\\Programming\\.Net\\WebApi\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization.csproj": {}
   },
   "projects": {
-    "G:\\Networking\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization.csproj": {
+    "D:\\Programming\\.Net\\WebApi\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "G:\\Networking\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization.csproj",
+        "projectUniqueName": "D:\\Programming\\.Net\\WebApi\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization.csproj",
         "projectName": "CookiesAuthorization",
-        "projectPath": "G:\\Networking\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization.csproj",
+        "projectPath": "D:\\Programming\\.Net\\WebApi\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization.csproj",
         "packagesPath": "C:\\Users\\Ed\\.nuget\\packages\\",
-        "outputPath": "G:\\Networking\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization\\obj\\",
+        "outputPath": "D:\\Programming\\.Net\\WebApi\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization\\CookiesAuthorization\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Ed\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -26,6 +26,7 @@
         },
         "frameworks": {
           "netcoreapp3.1": {
+            "targetAlias": "netcoreapp3.1",
             "projectReferences": {}
           }
         },
@@ -37,6 +38,7 @@
       },
       "frameworks": {
         "netcoreapp3.1": {
+          "targetAlias": "netcoreapp3.1",
           "dependencies": {
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
@@ -69,7 +71,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.201\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.301\\RuntimeIdentifierGraph.json"
         }
       }
     }

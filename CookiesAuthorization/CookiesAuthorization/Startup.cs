@@ -30,10 +30,16 @@ namespace CookiesAuthorization
         {
             services.AddControllers();
             services.AddCors();
+
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
                 {
-
+                    options.LoginPath = "/users/login";
+                    options.AccessDeniedPath = "/users/login";
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                    options.Cookie.Name = "Auth";
+                    options.Cookie.HttpOnly = false;
+                    options.Cookie.IsEssential = true;
                 });
             services.AddSingleton<IDatabaseProvider, MockDatabaseProvider>();
         }
@@ -47,12 +53,20 @@ namespace CookiesAuthorization
                 .AllowAnyMethod()
                 .AllowAnyHeader();
             });
+            app.UseCookiePolicy(new CookiePolicyOptions
+            {
+                MinimumSameSitePolicy = Microsoft.AspNetCore.Http.SameSiteMode.None,
+                CheckConsentNeeded = x => false,
+                HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.None
+            });
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
             app.UseHttpsRedirection();
             app.UseRouting();
+            app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
