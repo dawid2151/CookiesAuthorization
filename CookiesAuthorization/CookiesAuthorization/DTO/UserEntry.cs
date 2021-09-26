@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace CookiesAuthorization.DTO.v1
+namespace CookiesAuthorization.DTO
 {
     public class UserEntry
     {

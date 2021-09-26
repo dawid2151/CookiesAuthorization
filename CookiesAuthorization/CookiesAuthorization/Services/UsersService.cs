@@ -1,51 +1,55 @@
-﻿using CookiesAuthorization.DTO.v1;
-using CookiesAuthorization.Models.v1;
+﻿using CookiesAuthorization.DTO;
+using CookiesAuthorization.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
 
 namespace CookiesAuthorization.Services
 {
     public interface IUsersService
     {
-        public UserEntry GetUserByUserName(string username);
-        public bool AddUserEntry(UserEntry userEntry);
-        public bool RemoveUserEntry(UserEntry userEntry);
-        public List<UserEntry> GetUsersBasedOnQuery(GetUsersQuery query);
-
+        public User GetUserByUserName(string username);
+        public bool AddUser(User userEntry);
+        public bool RemoveUser(User userEntry);
+        public List<User> GetUsersBasedOnQuery(GetUsersQuery query);
 
     }
 
     public class UsersService : IUsersService
     {
         private IDatabaseProvider _databaseProvider;
-        public UsersService(IDatabaseProvider databaseProvider)
+        private IUserMapper _userMapper;
+        public UsersService(IDatabaseProvider databaseProvider, IUserMapper userMapper)
         {
             _databaseProvider = databaseProvider;
+            _userMapper = userMapper;
         }
 
-        UserEntry IUsersService.GetUserByUserName(string username)
+        User IUsersService.GetUserByUserName(string username)
         {
-            var user = _databaseProvider.UserEntries.SingleOrDefault(x => x.Username == username);
+            var userEntry = _databaseProvider.UserEntries.SingleOrDefault(x => x.Username == username);
+            var user = _userMapper.DomainFromDTO(userEntry);
             return user;
         }
 
-        bool IUsersService.AddUserEntry(UserEntry userEntry)
+        bool IUsersService.AddUser(User user)
         {
+            var userEntry = _userMapper.DTOFromDomain(user);
             _databaseProvider.UserEntries.Add(userEntry);
             return true;
         }
 
-        public List<UserEntry> GetUsersBasedOnQuery(GetUsersQuery query)
+        public List<User> GetUsersBasedOnQuery(GetUsersQuery query)
         {
-            var users = _databaseProvider.UserEntries.OrderBy(x => x.Username).Skip(query.Offset).Take(query.Count).ToList();
+            var userEntries = _databaseProvider.UserEntries.OrderBy(x => x.Username).Skip(query.Offset).Take(query.Count).ToList();
+            var users = userEntries.Select(x => _userMapper.DomainFromDTO(x)).ToList();
             return users;
         }
 
-        public bool RemoveUserEntry(UserEntry userEntry)
+        public bool RemoveUser(User user)
         {
+            var userEntry = _userMapper.DTOFromDomain(user);
+
             bool contains = _databaseProvider.UserEntries.Contains(userEntry);
             if (!contains)
                 return false;

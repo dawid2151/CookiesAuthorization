@@ -2,7 +2,7 @@
 using CookiesAuthorization.Contracts.v1;
 using CookiesAuthorization.Contracts.v1.Requests;
 using CookiesAuthorization.Contracts.v1.Responses;
-using CookiesAuthorization.Models.v1;
+using CookiesAuthorization.Domain;
 using CookiesAuthorization.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -16,10 +16,12 @@ namespace CookiesAuthorization.Controllers.v1
     public class UsersController : ControllerBase
     {
         private IUsersService _usersService;
+        private IUserMapper _userMapper;
 
-        public UsersController(IUsersService usersService)
+        public UsersController(IUsersService usersService, IUserMapper userMapper)
         {
             _usersService = usersService;
+            _userMapper = userMapper;
         }
 
         [HttpGet(Endpoints.Users.GetUserData)]
@@ -31,7 +33,7 @@ namespace CookiesAuthorization.Controllers.v1
             {
                 return Conflict("Authenticated user does not match a user in database.");
             }
-            var response = new UserDataResponse { UserName = user.Username, Role = user.Role };
+            var response = _userMapper.ResponseFromDomain(user);
             return Ok(response);
         }
         
@@ -39,15 +41,11 @@ namespace CookiesAuthorization.Controllers.v1
         [HttpGet(Endpoints.Users.GetUsersData)]
         public IActionResult GetUsersData([FromQuery]GetUsersDataRequest getUsers)
         {
-            var getUsersQuery = new GetUsersQuery
-            {
-                Count = getUsers.Count,
-                Offset = getUsers.Offset
-            };
-
+            var getUsersQuery = _userMapper.DomainFromRequest(getUsers);
             var users = _usersService.GetUsersBasedOnQuery(getUsersQuery);
+            var response = _userMapper.ResponseFromDomain(users);
 
-            return Ok(users);
+            return Ok(response);
         }
 
         [Authorize(Roles = Roles.Administrator)]
@@ -58,15 +56,11 @@ namespace CookiesAuthorization.Controllers.v1
             if (potentialUser is null)
                 return BadRequest("User does not exist.");
 
-            var removed = _usersService.RemoveUserEntry(potentialUser);
+            var removed = _usersService.RemoveUser(potentialUser);
             if (!removed)
                 return Conflict("Could not remove specified user.");
 
-            var response = new UserDataResponse
-            {
-                UserName = potentialUser.Username,
-                Role = potentialUser.Role
-            };
+            var response = _userMapper.ResponseFromDomain(potentialUser);
 
             return Ok(response);
         }

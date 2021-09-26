@@ -1,4 +1,5 @@
-﻿using CookiesAuthorization.DTO.v1;
+﻿using CookiesAuthorization.Domain;
+using CookiesAuthorization.DTO;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -7,10 +8,11 @@ namespace CookiesAuthorization.Services
     public interface IHashingService
     {
         public byte[] HashFromString(string data);
-        public string SaltFromUserEntry(UserEntry userEntry);
+        public string SaltFromUser(User user);
     }
     public class SHA256HashingService : IHashingService
     {
+
         public byte[] HashFromString(string data)
         {
             using (SHA256 sha = SHA256.Create())
@@ -19,9 +21,9 @@ namespace CookiesAuthorization.Services
             }
         }
 
-        public string SaltFromUserEntry(UserEntry userEntry)
+        public string SaltFromUser(User user)
         {
-            string salt = userEntry.UserID.ToString();
+            string salt = user.UserID.ToString();
             return salt;
         }
     }

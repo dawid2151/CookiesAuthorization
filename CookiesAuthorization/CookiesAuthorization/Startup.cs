@@ -1,18 +1,11 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using CookiesAuthorization.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace CookiesAuthorization
 {
@@ -44,6 +37,7 @@ namespace CookiesAuthorization
             services.AddSingleton<IDatabaseProvider, MockDatabaseProvider>();
             services.AddSingleton<IUsersService, UsersService>();
             services.AddSingleton<IHashingService, SHA256HashingService>();
+            services.AddSingleton<IUserMapper, UserMapper>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

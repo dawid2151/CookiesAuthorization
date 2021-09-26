@@ -1,14 +1,6 @@
-﻿using CookiesAuthorization.DTO.v1;
-using CookiesAuthorization.Models.v1;
-using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
+﻿using CookiesAuthorization.DTO;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Security.Cryptography.Xml;
-using System.Text;
-using System.Text.Unicode;
-using System.Threading.Tasks;
 
 namespace CookiesAuthorization.Services
 {

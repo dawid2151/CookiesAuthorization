@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using CookiesAuthorization.Contracts.v1;
 using CookiesAuthorization.Contracts.v1.Requests;
 using CookiesAuthorization.Contracts.v1.Responses;
-using CookiesAuthorization.DTO.v1;
+using CookiesAuthorization.DTO;
 using CookiesAuthorization.ExtensionMethods;
-using CookiesAuthorization.Models.v1;
+using CookiesAuthorization.Domain;
 using CookiesAuthorization.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -23,44 +23,29 @@ namespace CookiesAuthorization.Controllers
     {
         private IUsersService _usersService;
         private IHashingService _hashingService;
+        private IUserMapper _userMapper;
      
-        public AuthController(IUsersService usersService, IHashingService hashingService)
+        public AuthController(IUsersService usersService, IHashingService hashingService, IUserMapper userMapper)
         {
             _usersService = usersService;
             _hashingService = hashingService;
+            _userMapper = userMapper;
         }
+
         [HttpPost(Endpoints.Auth.Register)]
         public async Task<IActionResult> Register([FromForm]RegisterRequest registerRequest)
         {
-            if (registerRequest is null)
-                return BadRequest("Required infromations were not provided.");
-
             var potentialUser = _usersService.GetUserByUserName(registerRequest.Username);
             if (potentialUser != null)
                 return Conflict("User already exists.");
 
-            var userDTO = new UserEntry
-            {
-                UserID = Guid.NewGuid(),
-                Username = registerRequest.Username,
-                Role = Roles.User
-            };
-            string salt = _hashingService.SaltFromUserEntry(userDTO);
-            userDTO.Salt = salt;
-            userDTO.PasswordHash = _hashingService.HashFromString(registerRequest.Password + salt);
+            var user = CreateNewUser(registerRequest);
 
-            bool registered = _usersService.AddUserEntry(userDTO);
+            bool registered = _usersService.AddUser(user);
             if (!registered)
                 return Conflict("Can't register provided user.");
 
-            var userFromRequest = new User
-            {
-                UserID = userDTO.UserID,
-                Username = userDTO.Username,
-                Role = userDTO.Role
-            };
-
-            var claimPrincipal = ClaimPrincipalFromUser(userFromRequest);
+            var claimPrincipal = ClaimPrincipalFromUser(user);
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                 claimPrincipal,
@@ -73,11 +58,7 @@ namespace CookiesAuthorization.Controllers
                     ExpiresUtc = DateTime.UtcNow.AddDays(7)
                 });
 
-            var userResponse = new UserDataResponse
-            {
-                UserName = userDTO.Username,
-                Role = userDTO.Role
-            };
+            var userResponse = _userMapper.ResponseFromDomain(user);
 
             return Accepted(userResponse);
 
@@ -95,14 +76,8 @@ namespace CookiesAuthorization.Controllers
             if (!calculatedHash.Compare(requestedUser.PasswordHash))
                 return BadRequest("Password is not correct");
 
-            var userFromRequest = new User
-            {
-                UserID = requestedUser.UserID,
-                Username = requestedUser.Username,
-                Role = requestedUser.Role
-            };
 
-            var claimPrincipal = ClaimPrincipalFromUser(userFromRequest);
+            var claimPrincipal = ClaimPrincipalFromUser(requestedUser);
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                 claimPrincipal,
@@ -115,7 +90,7 @@ namespace CookiesAuthorization.Controllers
                 ExpiresUtc = DateTime.UtcNow.AddDays(7)
             }) ;
 
-            var userResponse = new UserDataResponse { UserName = requestedUser.Username, Role = requestedUser.Role };
+            var userResponse = _userMapper.ResponseFromDomain(requestedUser);
 
             return Ok(userResponse);
         }
@@ -144,6 +119,21 @@ namespace CookiesAuthorization.Controllers
             var claimPrincipal = new ClaimsPrincipal(claimIdentity);
 
             return claimPrincipal;
+        }
+
+        private User CreateNewUser(RegisterRequest registerRequest)
+        {
+            var user = new User
+            {
+                UserID = Guid.NewGuid(),
+                Username = registerRequest.Username,
+                Role = Roles.User
+            };
+            string salt = _hashingService.SaltFromUser(user);
+            user.Salt = salt;
+            user.PasswordHash = _hashingService.HashFromString(registerRequest.Password + salt);
+
+            return user;
         }
     }
 }
